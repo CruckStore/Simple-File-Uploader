@@ -45,11 +45,11 @@ app.get("/api/files", (req, res) => {
       return res
         .status(500)
         .json({ error: "Impossible de lister les fichiers" });
-    const fileList = files.map((file) => {
+    const fileList = files.map((file, index) => {
       const filePath = path.join(uploadFolder, file);
       const stats = fs.statSync(filePath);
       return {
-        id: file,
+        id: (index + 1).toString(),
         name: file,
         size: stats.size,
         date: stats.birthtime,

@@ -7,7 +7,7 @@ type FileData = {
   date: string;
 };
 
-type SortField = 'name' | 'size' | 'date';
+type SortField = 'id' | 'name' | 'size' | 'date';
 
 type SortConfig = {
   field: SortField;
@@ -58,7 +58,9 @@ const Download: React.FC = () => {
   const sortFiles = (field: SortField, order: 'asc' | 'desc') => {
     const sorted = [...files].sort((a, b) => {
       let result = 0;
-      if (field === 'size') {
+      if (field === 'id') {
+        result = a.id.localeCompare(b.id);
+      } else if (field === 'size') {
         result = a.size - b.size;
       } else if (field === 'date') {
         result = new Date(a.date).getTime() - new Date(b.date).getTime();
@@ -145,6 +147,10 @@ const Download: React.FC = () => {
     }
   };
 
+  const truncateId = (id: string, maxLength = 12): string => {
+    return id.length > maxLength ? id.substring(0, maxLength) + '...' : id;
+  };
+
   return (
     <div>
       <h2>Liste des fichiers</h2>
@@ -162,7 +168,9 @@ const Download: React.FC = () => {
         <thead>
           <tr>
             <th style={{ padding: '10px', border: '1px solid #ddd' }}>Sélection</th>
-            <th style={{ padding: '10px', border: '1px solid #ddd' }}>ID</th>
+            <th style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }} onClick={() => handleSort('id')}>
+              ID {getSortIndicator('id')}
+            </th>
             <th style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }} onClick={() => handleSort('name')}>
               Nom {getSortIndicator('name')}
             </th>
@@ -186,7 +194,7 @@ const Download: React.FC = () => {
                   onChange={(e) => handleSelect(file.id, e.target.checked)}
                 />
               </td>
-              <td style={{ padding: '10px', border: '1px solid #ddd' }}>{file.id}</td>
+              <td style={{ padding: '10px', border: '1px solid #ddd' }}>{truncateId(file.id)}</td>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{file.name}</td>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{formatBytes(file.size)}</td>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{new Date(file.date).toLocaleString()}</td>
