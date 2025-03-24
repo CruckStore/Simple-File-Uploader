@@ -16,7 +16,6 @@ const Upload: React.FC = () => {
       .then(data => {
         if (data.success) {
           setStatus('Fichier uploadé avec succès !');
-          // Si le fichier est une image, on affiche un aperçu
           if (file.type.startsWith('image/')) {
             const uploadedUrl = `http://localhost:3000/uploads/${data.file.filename}`;
             setPreviewUrl(uploadedUrl);
