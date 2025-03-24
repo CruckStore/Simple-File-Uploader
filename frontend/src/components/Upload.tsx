@@ -150,7 +150,7 @@ const Upload: React.FC = () => {
             </div>
           ))}
           {visibleCount < uploadedFiles.length && (
-            <button onClick={() => setVisibleCount(visibleCount + 10)} style={{ margin: '20px' }}>
+            <button onClick={() => setVisibleCount(visibleCount + 20)} style={{ margin: '20px' }}>
               Charger plus
             </button>
           )}
