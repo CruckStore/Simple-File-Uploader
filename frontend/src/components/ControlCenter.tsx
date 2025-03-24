@@ -9,13 +9,13 @@ type FileData = {
 const ControlCenter: React.FC = () => {
   const [files, setFiles] = useState<FileData[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [boxSize, setBoxSize] = useState<number>(150);
+  const [boxSize, setBoxSize] = useState<number>(300);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
 
   useEffect(() => {
     fetch('http://localhost:3000/api/files')
-      .then(response => response.json())
-      .then(data => setFiles(data));
+      .then((response) => response.json())
+      .then((data) => setFiles(data));
   }, []);
 
   const filteredFiles = files.filter(file =>
@@ -30,33 +30,68 @@ const ControlCenter: React.FC = () => {
   const renderPreview = (file: FileData) => {
     const ext = getFileExtension(file.name);
     const url = `http://localhost:3000/uploads/${file.name}`;
+
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'];
     if (ext && imageExtensions.includes(ext)) {
       return <img src={url} alt={file.name} style={{ width: '100%', height: 'auto', borderRadius: '4px' }} />;
     }
+
     const videoExtensions = ['mp4', 'webm', 'ogg'];
     if (ext && videoExtensions.includes(ext)) {
       return <video controls src={url} style={{ width: '100%' }} />;
     }
+
     const audioExtensions = ['mp3', 'wav', 'ogg'];
     if (ext && audioExtensions.includes(ext)) {
       return <audio controls src={url} style={{ width: '100%' }} />;
     }
-    const textExtensions = ['txt', 'html', 'htm', 'md'];
+
+    const htmlExtensions = ['html', 'htm'];
+    if (ext && htmlExtensions.includes(ext)) {
+      return (
+        <div style={{ position: 'relative', width: '100%', height: '150px' }}>
+          <iframe
+            src={url}
+            title={file.name}
+            style={{ width: '100%', height: '150px', border: 'none', filter: 'blur(5px)' }}
+            sandbox="allow-scripts allow-same-origin"
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '150px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(0,0,0,0.3)',
+              color: '#fff',
+              fontSize: '14px'
+            }}
+          >
+            Cliquez pour voir
+          </div>
+        </div>
+      );
+    }
+
+    const textExtensions = ['txt', 'md'];
     if (ext && textExtensions.includes(ext)) {
       return (
         <iframe
           src={url}
           title={file.name}
-          style={{ width: '100%', height: '100px', border: 'none' }}
-          sandbox="allow-same-origin"
+          style={{ width: '100%', height: '150px', border: 'none' }}
         />
       );
     }
+
     return (
       <div
         style={{
-          height: '100px',
+          height: '150px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -72,29 +107,45 @@ const ControlCenter: React.FC = () => {
   const renderLargePreview = (file: FileData) => {
     const ext = getFileExtension(file.name);
     const url = `http://localhost:3000/uploads/${file.name}`;
+
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'];
     if (ext && imageExtensions.includes(ext)) {
       return <img src={url} alt={file.name} style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: '4px' }} />;
     }
+
     const videoExtensions = ['mp4', 'webm', 'ogg'];
     if (ext && videoExtensions.includes(ext)) {
       return <video controls src={url} style={{ maxWidth: '90vw', maxHeight: '90vh' }} />;
     }
+
     const audioExtensions = ['mp3', 'wav', 'ogg'];
     if (ext && audioExtensions.includes(ext)) {
       return <audio controls src={url} style={{ width: '90vw' }} />;
     }
-    const textExtensions = ['txt', 'html', 'htm', 'md'];
+
+    const htmlExtensions = ['html', 'htm'];
+    if (ext && htmlExtensions.includes(ext)) {
+      return (
+        <iframe
+          src={url}
+          title={file.name}
+          style={{ width: '90vw', height: '80vh', border: 'none' }}
+          sandbox="allow-scripts allow-same-origin"
+        />
+      );
+    }
+
+    const textExtensions = ['txt', 'md'];
     if (ext && textExtensions.includes(ext)) {
       return (
         <iframe
           src={url}
           title={file.name}
           style={{ width: '90vw', height: '70vh', border: 'none' }}
-          sandbox="allow-same-origin"
         />
       );
     }
+
     return (
       <div
         style={{
@@ -112,7 +163,7 @@ const ControlCenter: React.FC = () => {
   };
 
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div style={{ textAlign: 'center', padding: '20px' }}>
       <h2>Control Center</h2>
       <div style={{ marginBottom: '20px' }}>
         <input
@@ -128,7 +179,7 @@ const ControlCenter: React.FC = () => {
           Taille des boîtes :
           <input
             type="range"
-            min="100"
+            min="200"
             max="1000"
             value={boxSize}
             onChange={(e) => setBoxSize(Number(e.target.value))}
