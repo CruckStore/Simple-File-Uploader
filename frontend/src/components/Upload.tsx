@@ -1,10 +1,13 @@
 import React, { useRef, useState } from 'react';
 
 interface UploadedFile {
+  id: string;
   url: string;
   mimetype: string;
   name: string;
   size: number;
+  progress: number;
+  xhr?: XMLHttpRequest;
 }
 
 const Upload: React.FC = () => {
@@ -14,33 +17,67 @@ const Upload: React.FC = () => {
   const [visibleCount, setVisibleCount] = useState<number>(10);
 
   const handleUpload = (file: File) => {
+    const id = `${Date.now()}-${Math.random()}`;
+    const xhr = new XMLHttpRequest();
+    const newFile: UploadedFile = {
+      id,
+      url: '',
+      mimetype: file.type,
+      name: file.name,
+      size: file.size,
+      progress: 0,
+      xhr: xhr,
+    };
+
+    setUploadedFiles(prev => [...prev, newFile]);
+
     const formData = new FormData();
     formData.append('file', file);
-    fetch('http://localhost:3000/upload', {
-      method: 'POST',
-      body: formData,
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          setStatus('Fichier(s) uploadé(s) avec succès !');
-          const url = `http://localhost:3000/uploads/${data.file.filename}`;
-          setUploadedFiles(prev => [
-            ...prev,
-            {
-              url,
-              mimetype: file.type,
-              name: file.name,
-              size: data.file.size,
-            },
-          ]);
+
+    xhr.open('POST', 'http://localhost:3000/upload');
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const progress = Math.round((event.loaded / event.total) * 100);
+        setUploadedFiles(prev =>
+          prev.map(f => f.id === id ? { ...f, progress } : f)
+        );
+      }
+    };
+
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (data.success) {
+              const url = `http://localhost:3000/uploads/${data.file.filename}`;
+              setUploadedFiles(prev =>
+                prev.map(f => f.id === id ? { ...f, url, progress: 100 } : f)
+              );
+              setStatus('Fichier(s) uploadé(s) avec succès !');
+            } else {
+              setStatus('Échec de l’upload.');
+            }
+          } catch (error) {
+            setStatus('Erreur lors de l’upload.');
+          }
         } else {
-          setStatus('Échec de l’upload.');
+          setStatus('Erreur lors de l’upload.');
         }
-      })
-      .catch(() => {
-        setStatus('Erreur lors de l’upload.');
-      });
+      }
+    };
+
+    xhr.send(formData);
+  };
+
+  const handleCancel = (id: string) => {
+    const fileToCancel = uploadedFiles.find(f => f.id === id);
+    if (fileToCancel && fileToCancel.xhr) {
+      fileToCancel.xhr.abort();
+      setUploadedFiles(prev => prev.filter(f => f.id !== id));
+      setStatus(`Upload annulé pour ${fileToCancel.name}`);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -81,7 +118,27 @@ const Upload: React.FC = () => {
   };
 
   const renderPreview = (uploadedFile: UploadedFile) => {
-    const { url, mimetype, name, size } = uploadedFile;
+    const { url, mimetype, name, size, progress, id } = uploadedFile;
+    if (!url) {
+      return (
+        <div>
+          <p>Upload en cours : {progress}%</p>
+          <div style={{ width: '100%', background: '#eee', borderRadius: '4px' }}>
+            <div
+              style={{
+                width: `${progress}%`,
+                background: '#4caf50',
+                height: '10px',
+                borderRadius: '4px'
+              }}
+            ></div>
+          </div>
+          <button onClick={() => handleCancel(id)} style={{ marginTop: '5px' }}>
+            Annuler
+          </button>
+        </div>
+      );
+    }
     if (isPreviewable(mimetype)) {
       if (mimetype.startsWith('image/')) {
         return <img src={url} alt={name} style={{ maxWidth: '100%', height: 'auto' }} />;
@@ -131,10 +188,11 @@ const Upload: React.FC = () => {
       {uploadedFiles.length > 0 && (
         <div>
           <h3>Fichiers uploadés :</h3>
-          {uploadedFiles.slice(0, visibleCount).map((file, index) => (
+          {uploadedFiles.slice(0, visibleCount).map((file) => (
             <div
-              key={index}
+              key={file.id}
               style={{
+                position: 'relative',
                 border: '1px solid #ddd',
                 borderRadius: '8px',
                 padding: '20px',
@@ -145,6 +203,21 @@ const Upload: React.FC = () => {
                 margin: '20px auto'
               }}
             >
+              <button
+                onClick={() => handleCancel(file.id)}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  color: '#888'
+                }}
+              >
+                ×
+              </button>
               <h4>{file.name}</h4>
               {renderPreview(file)}
             </div>
