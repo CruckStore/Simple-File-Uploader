@@ -1,0 +1,29 @@
+body {
+  background-color: #f9f9f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 30px;
+  color: #333;
+}
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+header {
+  margin-bottom: 20px;
+}
+nav a {
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: bold;
+  color: #333;
+}
+nav a:hover {
+  text-decoration: underline;
+}
+footer {
+  margin-top: 40px;
+  font-size: 0.9em;
+  color: #777;
+}
