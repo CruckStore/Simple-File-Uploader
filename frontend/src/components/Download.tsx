@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 type FileData = {
+  id: string;
   name: string;
   size: number;
   date: string;
@@ -18,6 +19,7 @@ const Download: React.FC = () => {
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   const [visibleCount, setVisibleCount] = useState<number>(50);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   useEffect(() => {
     fetch('http://localhost:3000/api/files')
@@ -125,6 +127,24 @@ const Download: React.FC = () => {
     }
   };
 
+  const handleSelect = (id: string, checked: boolean) => {
+    if (checked) {
+      setSelectedIds(prev => [...prev, id]);
+    } else {
+      setSelectedIds(prev => prev.filter(item => item !== id));
+    }
+  };
+
+  const handleSelectAll = () => {
+    const visibleIds = filteredFiles.slice(0, visibleCount).map(file => file.id);
+    const allSelected = visibleIds.every(id => selectedIds.includes(id));
+    if (allSelected) {
+      setSelectedIds(prev => prev.filter(id => !visibleIds.includes(id)));
+    } else {
+      setSelectedIds(prev => Array.from(new Set([...prev, ...visibleIds])));
+    }
+  };
+
   return (
     <div>
       <h2>Liste des fichiers</h2>
@@ -135,9 +155,14 @@ const Download: React.FC = () => {
         onChange={(e) => setSearchQuery(e.target.value)}
         style={{ padding: '10px', width: '80%', fontSize: '1em', marginBottom: '20px' }}
       />
+      <button onClick={handleSelectAll} style={{ marginBottom: '20px' }}>
+        Sélectionner/Désélectionner tous
+      </button>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
         <thead>
           <tr>
+            <th style={{ padding: '10px', border: '1px solid #ddd' }}>Sélection</th>
+            <th style={{ padding: '10px', border: '1px solid #ddd' }}>ID</th>
             <th style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }} onClick={() => handleSort('name')}>
               Nom {getSortIndicator('name')}
             </th>
@@ -153,7 +178,15 @@ const Download: React.FC = () => {
         </thead>
         <tbody>
           {filteredFiles.slice(0, visibleCount).map((file) => (
-            <tr key={file.name}>
+            <tr key={file.id}>
+              <td style={{ padding: '10px', border: '1px solid #ddd', textAlign: 'center' }}>
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(file.id)}
+                  onChange={(e) => handleSelect(file.id, e.target.checked)}
+                />
+              </td>
+              <td style={{ padding: '10px', border: '1px solid #ddd' }}>{file.id}</td>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{file.name}</td>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{formatBytes(file.size)}</td>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{new Date(file.date).toLocaleString()}</td>
