@@ -23,7 +23,7 @@ const App: React.FC = () => {
           <Route path="*" element={<Upload />} />
         </Routes>
       </main>
-      <footer>&copy; CDN API Demo</footer>
+      <footer>&copy; CruckStore - CDN API</footer>
     </div>
   );
 };
