@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react';
 const Upload: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<string>('');
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleUpload = (file: File) => {
     const formData = new FormData();
@@ -15,12 +16,21 @@ const Upload: React.FC = () => {
       .then(data => {
         if (data.success) {
           setStatus('Fichier uploadé avec succès !');
+          // Si le fichier est une image, on affiche un aperçu
+          if (file.type.startsWith('image/')) {
+            const uploadedUrl = `http://localhost:3000/uploads/${data.file.filename}`;
+            setPreviewUrl(uploadedUrl);
+          } else {
+            setPreviewUrl(null);
+          }
         } else {
-          setStatus('Echec de l’upload.');
+          setStatus('Échec de l’upload.');
+          setPreviewUrl(null);
         }
       })
       .catch(() => {
         setStatus('Erreur lors de l’upload.');
+        setPreviewUrl(null);
       });
   };
 
@@ -66,6 +76,12 @@ const Upload: React.FC = () => {
         onChange={handleFileChange}
       />
       <p>{status}</p>
+      {previewUrl && (
+        <div>
+          <h3>Aperçu :</h3>
+          <img src={previewUrl} alt="Aperçu du fichier uploadé" style={{ maxWidth: '100%', height: 'auto' }} />
+        </div>
+      )}
     </div>
   );
 };
