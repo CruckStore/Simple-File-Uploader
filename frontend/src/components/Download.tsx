@@ -65,6 +65,7 @@ const Download: React.FC = () => {
     return '';
   };
 
+  // Vérifie si le fichier est prévisualisable selon son extension
   const isPreviewable = (fileName: string) => {
     const previewableExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'mp4', 'webm', 'ogg', 'mp3', 'wav'];
     const ext = fileName.split('.').pop()?.toLowerCase();
@@ -73,12 +74,40 @@ const Download: React.FC = () => {
 
   const handleFileClick = (file: FileData) => {
     const url = `http://localhost:3000/uploads/${file.name}`;
+    // Si le fichier n'est pas prévisualisable, demande confirmation avant d'ouvrir
     if (!isPreviewable(file.name)) {
       if (!window.confirm(`C'est un fichier de ${formatBytes(file.size)}. Voulez-vous le télécharger ?`)) {
         return;
       }
     }
     window.open(url, '_blank');
+  };
+
+  const handleCopy = (file: FileData) => {
+    const url = `http://localhost:3000/uploads/${file.name}`;
+    navigator.clipboard.writeText(url)
+      .then(() => alert('Lien copié dans le presse-papiers !'))
+      .catch(() => alert('Erreur lors de la copie du lien.'));
+  };
+
+  const handleDelete = (file: FileData) => {
+    if (window.confirm('Voulez-vous vraiment supprimer ce fichier ?')) {
+      fetch(`http://localhost:3000/api/files/${file.name}`, {
+        method: 'DELETE',
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            setFiles(prev => prev.filter(f => f.name !== file.name));
+            alert('Fichier supprimé !');
+          } else {
+            alert("Erreur lors de la suppression");
+          }
+        })
+        .catch(() => {
+          alert("Erreur lors de la suppression");
+        });
+    }
   };
 
   return (
@@ -97,6 +126,7 @@ const Download: React.FC = () => {
               Date {getSortIndicator('date')}
             </th>
             <th style={{ padding: '10px', border: '1px solid #ddd' }}>Lien</th>
+            <th style={{ padding: '10px', border: '1px solid #ddd' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -109,6 +139,14 @@ const Download: React.FC = () => {
                 <a href="#!" onClick={() => handleFileClick(file)}>
                   Voir
                 </a>
+              </td>
+              <td style={{ padding: '10px', border: '1px solid #ddd', textAlign: 'center' }}>
+                <span style={{ cursor: 'pointer', marginRight: '10px' }} onClick={() => handleCopy(file)}>
+                  📋
+                </span>
+                <span style={{ cursor: 'pointer' }} onClick={() => handleDelete(file)}>
+                  🗑️
+                </span>
               </td>
             </tr>
           ))}

@@ -28,6 +28,14 @@ app.post('/upload', upload.single('file'), (req, res) => {
   res.json({ success: true, file: req.file });
 });
 
+app.delete('/api/files/:filename', (req, res) => {
+    const filePath = path.join(uploadFolder, req.params.filename);
+    fs.unlink(filePath, err => {
+      if (err) return res.status(500).json({ success: false, error: 'Erreur lors de la suppression' });
+      res.json({ success: true });
+    });
+  });  
+
 app.get('/api/files', (req, res) => {
   fs.readdir(uploadFolder, (err, files) => {
     if (err) return res.status(500).json({ error: 'Impossible de lister les fichiers' });
