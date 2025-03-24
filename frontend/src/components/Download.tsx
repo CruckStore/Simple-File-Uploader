@@ -52,7 +52,6 @@ const Download: React.FC = () => {
     if (sortConfig && sortConfig.field === field) {
       newOrder = sortConfig.order === 'asc' ? 'desc' : 'asc';
     } else {
-      // Par défaut, pour la date on veut du plus récent au moins récent (descendant)
       newOrder = field === 'date' ? 'desc' : 'asc';
     }
     setSortConfig({ field, order: newOrder });
@@ -66,28 +65,35 @@ const Download: React.FC = () => {
     return '';
   };
 
+  const isPreviewable = (fileName: string) => {
+    const previewableExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'mp4', 'webm', 'ogg', 'mp3', 'wav'];
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    return ext ? previewableExtensions.includes(ext) : false;
+  };
+
+  const handleFileClick = (file: FileData) => {
+    const url = `http://localhost:3000/uploads/${file.name}`;
+    if (!isPreviewable(file.name)) {
+      if (!window.confirm(`C'est un fichier de ${formatBytes(file.size)}. Voulez-vous le télécharger ?`)) {
+        return;
+      }
+    }
+    window.open(url, '_blank');
+  };
+
   return (
     <div>
       <h2>Liste des fichiers</h2>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
         <thead>
           <tr>
-            <th
-              style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }}
-              onClick={() => handleSort('name')}
-            >
+            <th style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }} onClick={() => handleSort('name')}>
               Nom {getSortIndicator('name')}
             </th>
-            <th
-              style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }}
-              onClick={() => handleSort('size')}
-            >
+            <th style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }} onClick={() => handleSort('size')}>
               Taille {getSortIndicator('size')}
             </th>
-            <th
-              style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }}
-              onClick={() => handleSort('date')}
-            >
+            <th style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }} onClick={() => handleSort('date')}>
               Date {getSortIndicator('date')}
             </th>
             <th style={{ padding: '10px', border: '1px solid #ddd' }}>Lien</th>
@@ -98,15 +104,9 @@ const Download: React.FC = () => {
             <tr key={file.name}>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{file.name}</td>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{formatBytes(file.size)}</td>
+              <td style={{ padding: '10px', border: '1px solid #ddd' }}>{new Date(file.date).toLocaleString()}</td>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>
-                {new Date(file.date).toLocaleString()}
-              </td>
-              <td style={{ padding: '10px', border: '1px solid #ddd' }}>
-                <a
-                  href={`http://localhost:3000/uploads/${file.name}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href="#!" onClick={() => handleFileClick(file)}>
                   Voir
                 </a>
               </td>

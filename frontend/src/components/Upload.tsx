@@ -4,6 +4,7 @@ interface UploadedFile {
   url: string;
   mimetype: string;
   name: string;
+  size: number;
 }
 
 const Upload: React.FC = () => {
@@ -27,6 +28,7 @@ const Upload: React.FC = () => {
             url,
             mimetype: file.type,
             name: file.name,
+            size: data.file.size,
           });
         } else {
           setStatus('Échec de l’upload.');
@@ -56,27 +58,45 @@ const Upload: React.FC = () => {
     }
   };
 
-  // Fonction pour afficher le bon aperçu selon le type MIME
+  const formatBytes = (bytes: number, decimals = 2): string => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  };
+
+  const isPreviewable = (mimetype: string) =>
+    mimetype.startsWith('image/') ||
+    mimetype.startsWith('video/') ||
+    mimetype.startsWith('audio/');
+
+  const handleDownload = (url: string, size: number) => {
+    if (window.confirm(`C'est un fichier de ${formatBytes(size)}. Voulez-vous le télécharger ?`)) {
+      window.open(url, '_blank');
+    }
+  };
+
   const renderPreview = () => {
     if (!uploadedFile) return null;
-    const { url, mimetype, name } = uploadedFile;
-    if (mimetype.startsWith('image/')) {
-      return <img src={url} alt={name} style={{ maxWidth: '100%', height: 'auto' }} />;
+    const { url, mimetype, name, size } = uploadedFile;
+    if (isPreviewable(mimetype)) {
+      if (mimetype.startsWith('image/')) {
+        return <img src={url} alt={name} style={{ maxWidth: '100%', height: 'auto' }} />;
+      }
+      if (mimetype.startsWith('video/')) {
+        return <video controls src={url} style={{ maxWidth: '100%' }} />;
+      }
+      if (mimetype.startsWith('audio/')) {
+        return <audio controls src={url} />;
+      }
     }
-    if (mimetype.startsWith('video/')) {
-      return <video controls src={url} style={{ maxWidth: '100%' }} />;
-    }
-    if (mimetype.startsWith('audio/')) {
-      return <audio controls src={url} />;
-    }
-    // Pour d'autres types, afficher un lien
     return (
-      <p>
-        Aperçu indisponible pour ce type de fichier.{' '}
-        <a href={url} target="_blank" rel="noopener noreferrer">
-          Ouvrir le fichier
-        </a>
-      </p>
+      <div>
+        <p>Ce fichier n'est pas prévisualisable (taille : {formatBytes(size)}).</p>
+        <button onClick={() => handleDownload(url, size)}>Télécharger le fichier</button>
+      </div>
     );
   };
 
@@ -121,11 +141,6 @@ const Upload: React.FC = () => {
         >
           <h3>{uploadedFile.name}</h3>
           {renderPreview()}
-          <p>
-            <a href={uploadedFile.url} target="_blank" rel="noopener noreferrer">
-              Voir le fichier
-            </a>
-          </p>
         </div>
       )}
     </div>
