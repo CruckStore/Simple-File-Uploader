@@ -11,6 +11,7 @@ const ControlCenter: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [boxSize, setBoxSize] = useState<number>(300);
   const [selectedFile, setSelectedFile] = useState<FileData | null>(null);
+  const [visibleCount, setVisibleCount] = useState<number>(50);
 
   useEffect(() => {
     fetch('http://localhost:3000/api/files')
@@ -22,29 +23,41 @@ const ControlCenter: React.FC = () => {
     file.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  useEffect(() => {
+    setVisibleCount(50);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+        setVisibleCount(prev => Math.min(prev + 50, filteredFiles.length));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [filteredFiles]);
+
   const getFileExtension = (fileName: string): string => {
     const parts = fileName.split('.');
     return parts.length > 1 ? parts.pop()!.toLowerCase() : '';
   };
 
-  // Extensions considérées comme documents/texte/code
   const docExtensions = ['html', 'htm', 'txt', 'md', 'ts', 'tsx', 'js', 'jsx', 'c', 'cpp', 'java', 'css', 'scss', 'sql', 'py', 'rb', 'php'];
 
-  // Extensions pour les vidéos
   const videoExtensions = ['mp4', 'webm', 'ogg'];
 
-  // Prévisualisation dans la carte (petit aperçu)
   const renderPreview = (file: FileData) => {
     const ext = getFileExtension(file.name);
     const url = `http://localhost:3000/uploads/${file.name}`;
 
-    // Pour les images
+    // Images
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'];
     if (ext && imageExtensions.includes(ext)) {
       return <img src={url} alt={file.name} style={{ width: '100%', height: 'auto', borderRadius: '4px' }} />;
     }
 
-    // Pour les vidéos : on n'affiche pas le lecteur dans la carte, juste un placeholder
+    // Vidéos
     if (ext && videoExtensions.includes(ext)) {
       return (
         <div style={{ position: 'relative', width: '100%', height: '150px', background: '#000' }}>
@@ -81,13 +94,12 @@ const ControlCenter: React.FC = () => {
       );
     }
 
-    // Pour l'audio, on affiche directement le lecteur (il ne pose pas de problème)
+    // Audio
     const audioExtensions = ['mp3', 'wav', 'ogg'];
     if (ext && audioExtensions.includes(ext)) {
       return <audio controls src={url} style={{ width: '100%' }} />;
     }
 
-    // Pour les documents/code (incluant HTML, mais ici on affiche un aperçu flou)
     if (ext && docExtensions.includes(ext)) {
       return (
         <div style={{ position: 'relative', width: '100%', height: '150px' }}>
@@ -118,7 +130,6 @@ const ControlCenter: React.FC = () => {
       );
     }
 
-    // Sinon, placeholder
     return (
       <div
         style={{
@@ -135,29 +146,28 @@ const ControlCenter: React.FC = () => {
     );
   };
 
-  // Vue agrandie dans le modal (sans flou) et avec comportement adapté pour les vidéos
   const renderLargePreview = (file: FileData) => {
     const ext = getFileExtension(file.name);
     const url = `http://localhost:3000/uploads/${file.name}`;
 
-    // Pour les images
+    // Images
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'];
     if (ext && imageExtensions.includes(ext)) {
       return <img src={url} alt={file.name} style={{ maxWidth: '90vw', maxHeight: '90vh', borderRadius: '4px' }} />;
     }
 
-    // Pour les vidéos, on affiche le lecteur (et le composant modal se démonte à la fermeture pour arrêter la vidéo)
+    // Vidéos
     if (ext && videoExtensions.includes(ext)) {
       return <video controls src={url} style={{ maxWidth: '90vw', maxHeight: '90vh' }} />;
     }
 
-    // Pour l'audio
+    // Audio
     const audioExtensions = ['mp3', 'wav', 'ogg'];
     if (ext && audioExtensions.includes(ext)) {
       return <audio controls src={url} style={{ width: '90vw' }} />;
     }
 
-    // Pour les documents/code
+    // Documents / Code
     if (ext && docExtensions.includes(ext)) {
       return (
         <iframe
@@ -169,7 +179,6 @@ const ControlCenter: React.FC = () => {
       );
     }
 
-    // Sinon, placeholder
     return (
       <div
         style={{
@@ -213,7 +222,7 @@ const ControlCenter: React.FC = () => {
         </label>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '20px' }}>
-        {filteredFiles.map(file => (
+        {filteredFiles.slice(0, visibleCount).map(file => (
           <div
             key={file.name}
             style={{

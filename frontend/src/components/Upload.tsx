@@ -11,6 +11,7 @@ const Upload: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<string>('');
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [visibleCount, setVisibleCount] = useState<number>(10);
 
   const handleUpload = (file: File) => {
     const formData = new FormData();
@@ -130,7 +131,7 @@ const Upload: React.FC = () => {
       {uploadedFiles.length > 0 && (
         <div>
           <h3>Fichiers uploadés :</h3>
-          {uploadedFiles.map((file, index) => (
+          {uploadedFiles.slice(0, visibleCount).map((file, index) => (
             <div
               key={index}
               style={{
@@ -148,6 +149,11 @@ const Upload: React.FC = () => {
               {renderPreview(file)}
             </div>
           ))}
+          {visibleCount < uploadedFiles.length && (
+            <button onClick={() => setVisibleCount(visibleCount + 10)} style={{ margin: '20px' }}>
+              Charger plus
+            </button>
+          )}
         </div>
       )}
     </div>

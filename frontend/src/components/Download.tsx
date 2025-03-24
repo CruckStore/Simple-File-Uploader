@@ -16,12 +16,33 @@ type SortConfig = {
 const Download: React.FC = () => {
   const [files, setFiles] = useState<FileData[]>([]);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  const [visibleCount, setVisibleCount] = useState<number>(50);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     fetch('http://localhost:3000/api/files')
       .then(response => response.json())
       .then(data => setFiles(data));
   }, []);
+
+  const filteredFiles = files.filter(file =>
+    file.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  useEffect(() => {
+    setVisibleCount(50);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+        setVisibleCount(prev => Math.min(prev + 50, filteredFiles.length));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [filteredFiles]);
 
   const formatBytes = (bytes: number, decimals = 2): string => {
     if (bytes === 0) return "0 Bytes";
@@ -90,9 +111,7 @@ const Download: React.FC = () => {
 
   const handleDelete = (file: FileData) => {
     if (window.confirm('Voulez-vous vraiment supprimer ce fichier ?')) {
-      fetch(`http://localhost:3000/api/files/${file.name}`, {
-        method: 'DELETE',
-      })
+      fetch(`http://localhost:3000/api/files/${file.name}`, { method: 'DELETE' })
         .then(response => response.json())
         .then(data => {
           if (data.success) {
@@ -102,15 +121,20 @@ const Download: React.FC = () => {
             alert("Erreur lors de la suppression");
           }
         })
-        .catch(() => {
-          alert("Erreur lors de la suppression");
-        });
+        .catch(() => alert("Erreur lors de la suppression"));
     }
   };
 
   return (
     <div>
       <h2>Liste des fichiers</h2>
+      <input
+        type="text"
+        placeholder="Rechercher par nom..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        style={{ padding: '10px', width: '80%', fontSize: '1em', marginBottom: '20px' }}
+      />
       <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
         <thead>
           <tr>
@@ -128,7 +152,7 @@ const Download: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {files.map((file) => (
+          {filteredFiles.slice(0, visibleCount).map((file) => (
             <tr key={file.name}>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{file.name}</td>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{formatBytes(file.size)}</td>
