@@ -28,6 +28,15 @@ const Download: React.FC = () => {
     setFiles(sorted);
   };
 
+  const formatBytes = (bytes: number, decimals = 2): string => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  };
+
   return (
     <div>
       <h2>Liste des fichiers</h2>
@@ -35,7 +44,7 @@ const Download: React.FC = () => {
         <thead>
           <tr>
             <th style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }} onClick={() => sortFiles('name')}>Nom</th>
-            <th style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }} onClick={() => sortFiles('size')}>Taille (octets)</th>
+            <th style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }} onClick={() => sortFiles('size')}>Taille</th>
             <th style={{ padding: '10px', border: '1px solid #ddd', cursor: 'pointer' }} onClick={() => sortFiles('date')}>Date</th>
             <th style={{ padding: '10px', border: '1px solid #ddd' }}>Lien</th>
           </tr>
@@ -44,7 +53,7 @@ const Download: React.FC = () => {
           {files.map((file) => (
             <tr key={file.name}>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{file.name}</td>
-              <td style={{ padding: '10px', border: '1px solid #ddd' }}>{file.size}</td>
+              <td style={{ padding: '10px', border: '1px solid #ddd' }}>{formatBytes(file.size)}</td>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>{new Date(file.date).toLocaleString()}</td>
               <td style={{ padding: '10px', border: '1px solid #ddd' }}>
                 <a href={`http://localhost:3000/uploads/${file.name}`} target="_blank" rel="noopener noreferrer">

@@ -1,9 +1,15 @@
 import React, { useRef, useState } from 'react';
 
+interface UploadedFile {
+  url: string;
+  mimetype: string;
+  name: string;
+}
+
 const Upload: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState<string>('');
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<UploadedFile | null>(null);
 
   const handleUpload = (file: File) => {
     const formData = new FormData();
@@ -16,20 +22,20 @@ const Upload: React.FC = () => {
       .then(data => {
         if (data.success) {
           setStatus('Fichier uploadé avec succès !');
-          if (file.type.startsWith('image/')) {
-            const uploadedUrl = `http://localhost:3000/uploads/${data.file.filename}`;
-            setPreviewUrl(uploadedUrl);
-          } else {
-            setPreviewUrl(null);
-          }
+          const url = `http://localhost:3000/uploads/${data.file.filename}`;
+          setUploadedFile({
+            url,
+            mimetype: file.type,
+            name: file.name,
+          });
         } else {
           setStatus('Échec de l’upload.');
-          setPreviewUrl(null);
+          setUploadedFile(null);
         }
       })
       .catch(() => {
         setStatus('Erreur lors de l’upload.');
-        setPreviewUrl(null);
+        setUploadedFile(null);
       });
   };
 
@@ -48,6 +54,30 @@ const Upload: React.FC = () => {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleUpload(e.dataTransfer.files[0]);
     }
+  };
+
+  // Fonction pour afficher le bon aperçu selon le type MIME
+  const renderPreview = () => {
+    if (!uploadedFile) return null;
+    const { url, mimetype, name } = uploadedFile;
+    if (mimetype.startsWith('image/')) {
+      return <img src={url} alt={name} style={{ maxWidth: '100%', height: 'auto' }} />;
+    }
+    if (mimetype.startsWith('video/')) {
+      return <video controls src={url} style={{ maxWidth: '100%' }} />;
+    }
+    if (mimetype.startsWith('audio/')) {
+      return <audio controls src={url} />;
+    }
+    // Pour d'autres types, afficher un lien
+    return (
+      <p>
+        Aperçu indisponible pour ce type de fichier.{' '}
+        <a href={url} target="_blank" rel="noopener noreferrer">
+          Ouvrir le fichier
+        </a>
+      </p>
+    );
   };
 
   return (
@@ -75,10 +105,27 @@ const Upload: React.FC = () => {
         onChange={handleFileChange}
       />
       <p>{status}</p>
-      {previewUrl && (
-        <div>
-          <h3>Aperçu :</h3>
-          <img src={previewUrl} alt="Aperçu du fichier uploadé" style={{ maxWidth: '100%', height: 'auto' }} />
+
+      {uploadedFile && (
+        <div
+          style={{
+            border: '1px solid #ddd',
+            borderRadius: '8px',
+            padding: '20px',
+            marginTop: '20px',
+            backgroundColor: '#fff',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+            maxWidth: '500px',
+            margin: '20px auto'
+          }}
+        >
+          <h3>{uploadedFile.name}</h3>
+          {renderPreview()}
+          <p>
+            <a href={uploadedFile.url} target="_blank" rel="noopener noreferrer">
+              Voir le fichier
+            </a>
+          </p>
         </div>
       )}
     </div>
