@@ -65,7 +65,6 @@ const Download: React.FC = () => {
     return '';
   };
 
-  // Vérifie si le fichier est prévisualisable selon son extension
   const isPreviewable = (fileName: string) => {
     const previewableExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'mp4', 'webm', 'ogg', 'mp3', 'wav'];
     const ext = fileName.split('.').pop()?.toLowerCase();
@@ -74,7 +73,6 @@ const Download: React.FC = () => {
 
   const handleFileClick = (file: FileData) => {
     const url = `http://localhost:3000/uploads/${file.name}`;
-    // Si le fichier n'est pas prévisualisable, demande confirmation avant d'ouvrir
     if (!isPreviewable(file.name)) {
       if (!window.confirm(`C'est un fichier de ${formatBytes(file.size)}. Voulez-vous le télécharger ?`)) {
         return;
