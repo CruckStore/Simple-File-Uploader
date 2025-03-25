@@ -106,7 +106,7 @@ const ControlCenter: React.FC = () => {
           <iframe
             src={url}
             title={file.name}
-            style={{ width: '100%', height: '150px', border: 'none', filter: 'blur(5px)' }}
+            style={{ width: '100%', height: '150px', border: 'none' }}
             sandbox="allow-scripts allow-same-origin"
           />
           <div
@@ -124,7 +124,6 @@ const ControlCenter: React.FC = () => {
               fontSize: '14px'
             }}
           >
-            Cliquez pour voir
           </div>
         </div>
       );
