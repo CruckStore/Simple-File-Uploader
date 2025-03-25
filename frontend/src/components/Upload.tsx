@@ -184,7 +184,6 @@ const Upload: React.FC = () => {
         onChange={handleFileChange}
       />
       <p>{status}</p>
-
       {uploadedFiles.length > 0 && (
         <div>
           <h3>Fichiers uploadés :</h3>
@@ -203,23 +202,21 @@ const Upload: React.FC = () => {
                 margin: '20px auto'
               }}
             >
-              {urlIsVisible(file) && (
-                <button
-                  onClick={() => setUploadedFiles(prev => prev.filter(f => f.id !== file.id))}
-                  style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    background: 'transparent',
-                    border: 'none',
-                    fontSize: '20px',
-                    cursor: 'pointer',
-                    color: 'rgb(136, 136, 136)',
-                  }}
-                >
-                  ×
-                </button>
-              )}
+              <button
+                onClick={() => setUploadedFiles(prev => prev.filter(f => f.id !== file.id))}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '20px',
+                  cursor: 'pointer',
+                  color: 'rgb(136, 136, 136)',
+                }}
+              >
+                ×
+              </button>
               <h4>{file.name}</h4>
               {renderPreview(file)}
             </div>
@@ -233,10 +230,6 @@ const Upload: React.FC = () => {
       )}
     </div>
   );
-};
-
-const urlIsVisible = (file: UploadedFile) => {
-  return file.url !== '';
 };
 
 export default Upload;
