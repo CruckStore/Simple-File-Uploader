@@ -39,20 +39,20 @@ app.delete("/api/files/:filename", (req, res) => {
   });
 });
 
-app.get("/api/files", (req, res) => {
+app.get('/api/files', (req, res) => {
   fs.readdir(uploadFolder, (err, files) => {
-    if (err)
-      return res
-        .status(500)
-        .json({ error: "Impossible de lister les fichiers" });
+    if (err) return res.status(500).json({ error: 'Impossible de lister les fichiers' });
     const fileList = files.map((file, index) => {
       const filePath = path.join(uploadFolder, file);
       const stats = fs.statSync(filePath);
+      const fullName = file;
+      const originalName = file.includes('-') ? file.split('-').slice(1).join('-') : file;
       return {
         id: (index + 1).toString(),
-        name: file,
+        filename: fullName,
+        name: originalName,
         size: stats.size,
-        date: stats.birthtime,
+        date: stats.birthtime
       };
     });
     res.json(fileList);
