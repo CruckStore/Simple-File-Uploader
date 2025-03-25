@@ -8,7 +8,7 @@ const App: React.FC = () => {
   return (
     <div className="container">
       <header>
-        <h1>CDN API</h1>
+        <h1>File Uploader</h1>
         <nav>
           <Link to="/upload">Upload</Link> |{' '}
           <Link to="/download">Download</Link> |{' '}
@@ -23,7 +23,7 @@ const App: React.FC = () => {
           <Route path="*" element={<Upload />} />
         </Routes>
       </main>
-      <footer>&copy; CruckStore - CDN API</footer>
+      <footer>&copy; CruckStore - File Uploader</footer>
     </div>
   );
 };
