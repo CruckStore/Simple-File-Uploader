@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 
 type FileData = {
+  id: string;
+  filename: string;
   name: string;
   size: number;
   date: string;
@@ -49,8 +51,8 @@ const ControlCenter: React.FC = () => {
 
   const renderPreview = (file: FileData) => {
     const ext = getFileExtension(file.name);
-    const url = `http://localhost:3000/uploads/${file.name}`;
-
+    const url = `http://localhost:3000/uploads/${file.filename}`;
+    
     // Images
     const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'];
     if (ext && imageExtensions.includes(ext)) {

@@ -45,11 +45,11 @@ app.get('/api/files', (req, res) => {
     const fileList = files.map((file, index) => {
       const filePath = path.join(uploadFolder, file);
       const stats = fs.statSync(filePath);
-      const fullName = file;
+      const fullFilename = file;
       const originalName = file.includes('-') ? file.split('-').slice(1).join('-') : file;
       return {
         id: (index + 1).toString(),
-        filename: fullName,
+        filename: fullFilename,
         name: originalName,
         size: stats.size,
         date: stats.birthtime
@@ -58,6 +58,7 @@ app.get('/api/files', (req, res) => {
     res.json(fileList);
   });
 });
+
 
 app.use("/uploads", express.static(uploadFolder));
 

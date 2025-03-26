@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 type FileData = {
   id: string;
+  filename: string;
   name: string;
   size: number;
   date: string;
@@ -97,8 +98,8 @@ const Download: React.FC = () => {
   };
 
   const handleFileClick = (file: FileData) => {
-    const url = `http://localhost:3000/uploads/${file.name}`;
-    if (!isPreviewable(file.name)) {
+    const url = `http://localhost:3000/uploads/${file.filename}`;
+    if (!isPreviewable(file.filename)) {
       if (!window.confirm(`C'est un fichier de ${formatBytes(file.size)}. Voulez-vous le télécharger ?`)) {
         return;
       }
@@ -107,7 +108,7 @@ const Download: React.FC = () => {
   };
 
   const handleCopy = (file: FileData) => {
-    const url = `http://localhost:3000/uploads/${file.name}`;
+    const url = `http://localhost:3000/uploads/${file.filename}`;
     navigator.clipboard.writeText(url)
       .then(() => alert('Lien copié dans le presse-papiers !'))
       .catch(() => alert('Erreur lors de la copie du lien.'));
@@ -115,11 +116,11 @@ const Download: React.FC = () => {
 
   const handleDelete = (file: FileData) => {
     if (window.confirm('Voulez-vous vraiment supprimer ce fichier ?')) {
-      fetch(`http://localhost:3000/api/files/${file.name}`, { method: 'DELETE' })
+      fetch(`http://localhost:3000/api/files/${file.filename}`, { method: 'DELETE' })
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            setFiles(prev => prev.filter(f => f.name !== file.name));
+            setFiles(prev => prev.filter(f => f.filename !== file.filename));
             alert('Fichier supprimé !');
           } else {
             alert("Erreur lors de la suppression");
