@@ -79,7 +79,7 @@ If you have a better solution for deploying or serving the API, feel free to sug
 
 ## :clock3: Development Timeline
 
-This project was built in under **10 hours**!
+This project was built in under **6h hours** spaced over 3 days!
 
 ---
 
