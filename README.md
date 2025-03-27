@@ -1,9 +1,8 @@
-```markdown
-# File-CDN API Dashboard
+# File-Uploader API Dashboard
 
-🚀 **Discover File-CDN API Dashboard!**
+🚀 **Discover File-Uploader API Dashboard!**
 
-I'm excited to share **File-CDN API Dashboard**, a powerful API for seamless file uploads, retrievals, and real-time logging – all managed through an intuitive status dashboard. 📁🔗
+I'm excited to share **File-Uploader API Dashboard**, a powerful API for seamless file uploads, retrievals, and real-time logging – all managed through an intuitive status dashboard. 📁🔗
 
 ---
 
@@ -94,5 +93,4 @@ Contact me on Discord: `gtol` and let’s discuss your ideas!
 
 ---
 
-Thank you for checking out File-CDN API Dashboard. Contributions are welcome – let’s build something awesome together! ❤️
-```
+Thank you for checking out File-Uploader API Dashboard. Contributions are welcome – let’s build something awesome together! ❤️
