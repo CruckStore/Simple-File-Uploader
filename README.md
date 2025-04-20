@@ -85,7 +85,7 @@ This project was built in under **6h hours** spaced over 3 days!
 
 ## 📣 Join Our Community
 
-📢 **Join our Discord Server:** [discord.gg/YOUR_DISCORD](https://discord.gg/cruckstore)  
+📢 **Join our Discord Server:** [discord.gg/cruckstore](https://discord.gg/cruckstore)  
 Chat with me and the community, share ideas, and get support for your projects!
 
 💡 **Need a Custom Project?**  
